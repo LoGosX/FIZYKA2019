@@ -1,4 +1,4 @@
-#Cloning and building the project
+# Cloning and building the project
 
 To clone a project run this command
 ```bash
@@ -19,8 +19,9 @@ This chain of commands should clone repository, build it using cmake and run a p
 ```bash
 git clone --recurse-submodules https://github.com/LoGosX/FIZYKA2019
 cd FIZYKA2019
-cmake .
-cmake --build build --config Release
+cd build
+cmake ..
+cmake --build . --config Release
 build/Release/FIZYKA2019
 ```
 
