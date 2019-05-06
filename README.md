@@ -22,7 +22,7 @@ cd FIZYKA2019
 cd build
 cmake ..
 cmake --build . --config Release
-build/Release/FIZYKA2019
+Release/FIZYKA2019
 ```
 
 # Linux dependencies:
