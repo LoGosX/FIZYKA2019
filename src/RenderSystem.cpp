@@ -1,15 +1,21 @@
 #include "RenderSystem.h"
 #include <SFML/Graphics.hpp>
 #include "ParticleSystem.h"
+#include "constants.h"
+#include <cstdlib> // for srand()
 
 RenderSystem::RenderSystem(int window_width, int window_height, const char* window_title)
 {
 	window = std::unique_ptr<sf::RenderWindow>(new sf::RenderWindow(sf::VideoMode(window_width, window_height), window_title));
-	particle_sprite = sf::CircleShape(ParticleSystem::PARTICLE_RADIUS);
-	particle_sprite.setFillColor(sf::Color::Red);
-	particle_sprite.setOrigin(ParticleSystem::PARTICLE_RADIUS, ParticleSystem::PARTICLE_RADIUS);
-	particle_sprite.setOutlineColor(sf::Color::Green);
-	particle_sprite.setOutlineThickness(2);
+	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS);
+	particle_sprite.setFillColor(sf::Color::Green);
+	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
+	sf::View view;
+	view.setCenter(0, 0);
+	view.setSize(2 * constants::R, 2 * constants::R);
+	window->setView(view);
+
+	srand(0); //constant seed to get reproducible simulations
 }
 
 

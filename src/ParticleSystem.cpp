@@ -1,9 +1,8 @@
 #include "ParticleSystem.h"
 #include <iostream>
+#include "constants.h"
 
-const float ParticleSystem::PARTICLE_RADIUS = 50.f;
-
-ParticleSystem::ParticleSystem(int particle_count, sf::Vector2f area_dimensions) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ 0.0f, 0.0f }), BOTTOM_RIGHT(area_dimensions)
+ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ -R, -R }), BOTTOM_RIGHT(sf::Vector2f{ R, R })
 {
 	spawn_particles();
 }
@@ -22,8 +21,15 @@ bool ParticleSystem::update(double delta_time)
 
 void ParticleSystem::spawn_particles()
 {
-	for(int i = 0; i < PARTICLE_COUNT; i++)
-		particles.emplace_back(Particle{(BOTTOM_RIGHT - UPPER_LEFT) / 2.f, { 400.f / (i + 1), 444.f / (i + 1) }});
+	float end_point = constants::W / (2 * PARTICLE_COUNT);
+	for (int i = 0; i < PARTICLE_COUNT; i++)
+	{
+		float vx = (2 * rand() - 1.f) * end_point;
+		float vy = (2 * rand() - 1.f) * end_point;
+		float x = (2 * rand() - 1.f) * constants::R;
+		float y = (2 * rand() - 1.f) * constants::R;
+		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } });
+	}
 }
 
 void ParticleSystem::update_positions(double delta_time)
@@ -40,6 +46,7 @@ void ParticleSystem::update_particles_collisions()
 void ParticleSystem::update_wall_collisions()
 {
 	//wall collisions
+	float PARTICLE_RADIUS = constants::PARTICLE_RADIUS;
 	for (auto& p : particles)
 	{
 		if (p.position.x - PARTICLE_RADIUS <= UPPER_LEFT.x)

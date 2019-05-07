@@ -31,12 +31,11 @@ class ParticleSystem
 public:
 	/*
 	particle_count - how many particles to spawn
-	area_dimensions - width and height of rectangle in which particles are moving. The UPPER_LEFT corner of rectangle is (0, 0), where BOTTOM_RIGHT corner is area_dimensions 
+	R - 1/2 of width and height of rectangle in which particles are moving. The UPPER_LEFT corner of rectangle is (-R, R), where BOTTOM_RIGHT corner is (R,R)
+	Note that Y axis is inverted (Y is getting bigger when moving down)
 	*/
 
-	static const float PARTICLE_RADIUS; //defined in ParticleSystem.cpp
-
-	ParticleSystem(int particle_count, sf::Vector2f area_dimensions);
+	ParticleSystem(int particle_count, float R);
 	~ParticleSystem();
 
 	bool update(double delta_time); 

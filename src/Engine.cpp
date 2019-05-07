@@ -2,12 +2,13 @@
 #include <iostream>
 #include "RenderSystem.h"
 #include "ParticleSystem.h"
+#include "constants.h"
 
 Engine::Engine(int window_width, int window_height, const char * window_title)
 {
 	std::cout << "Initializing systems.\n";
 	render_system = std::unique_ptr<RenderSystem>(new RenderSystem(window_width, window_height, window_title));
-	particle_system = std::unique_ptr<ParticleSystem>(new ParticleSystem(10, sf::Vector2f(window_width, window_height))); //TODO: load values from file (?)
+	particle_system = std::unique_ptr<ParticleSystem>(new ParticleSystem(constants::PARTICLES_COUNT, constants::R)); //TODO: load values from file (?)
 }
 
 Engine::~Engine()
