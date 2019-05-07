@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include "EntropyCounter.h"
 
 struct Particle
 {
@@ -18,6 +19,8 @@ class ParticleSystem
 	const int PARTICLE_COUNT;
 	const sf::Vector2f UPPER_LEFT, BOTTOM_RIGHT;
 	std::vector<Particle> particles;
+
+	std::unique_ptr<EntropyCounter> _enCounter; // This is my stuff to count a entropy of the system
 
 	void spawn_particles();
 	void update_positions(double delta_time);
