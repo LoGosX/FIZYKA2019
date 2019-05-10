@@ -1,8 +1,10 @@
-#include "RenderSystem.h"
-#include <SFML/Graphics.hpp>
-#include "ParticleSystem.h"
-#include "constants.h"
 #include <cstdlib> // for srand()
+
+#include <SFML/Graphics.hpp>
+#include "RenderSystem.h"
+#include "Particle.h"
+#include "constants.h"
+#include "ParticleSystem.h"
 
 RenderSystem::RenderSystem(int window_width, int window_height, const char* window_title)
 {

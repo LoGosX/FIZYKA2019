@@ -1,15 +1,11 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include <SFML/Graphics.hpp>
 #include "EntropyCounter.h"
+#include <SFML/System/Vector2.hpp>
 
 
-struct Particle
-{
-	sf::Vector2f position;
-	sf::Vector2f velocity;
-};
+struct Particle;
 
 class ParticleSystem
 {

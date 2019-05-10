@@ -1,6 +1,9 @@
-#include "ParticleSystem.h"
 #include <iostream>
+
+#include "ParticleSystem.h"
 #include "constants.h"
+#include "Particle.h"
+#include "utils.h"
 
 ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ -R, -R }), BOTTOM_RIGHT(sf::Vector2f{ R, R })
 {
@@ -24,10 +27,10 @@ void ParticleSystem::spawn_particles()
 	float end_point = constants::W / (2 * PARTICLE_COUNT);
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		float vx = (2 * rand() - 1.f) * end_point;
-		float vy = (2 * rand() - 1.f) * end_point;
-		float x = (2 * rand() - 1.f) * constants::R;
-		float y = (2 * rand() - 1.f) * constants::R;
+		float vx = utils::random::rand(-end_point, end_point);
+		float vy = utils::random::rand(-end_point, end_point);
+		float x = utils::random::rand(-constants::R, constants::R);
+		float y = utils::random::rand(-constants::R, constants::R);
 		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } });
 	}
 }
