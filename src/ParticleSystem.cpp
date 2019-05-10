@@ -24,11 +24,11 @@ bool ParticleSystem::update(double delta_time)
 
 void ParticleSystem::spawn_particles()
 {
-	float end_point = constants::W / (2 * PARTICLE_COUNT);
+	float max_vel = constants::W / (2 * PARTICLE_COUNT);
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		float vx = utils::random::rand(-end_point, end_point);
-		float vy = utils::random::rand(-end_point, end_point);
+		float vx = utils::random::rand(-max_vel, max_vel);
+		float vy = utils::random::rand(-max_vel, max_vel);
 		float x = utils::random::rand(-constants::R, constants::R);
 		float y = utils::random::rand(-constants::R, constants::R);
 		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } });
@@ -78,4 +78,9 @@ void ParticleSystem::update_wall_collisions()
 const std::vector<Particle>& ParticleSystem::get_particles() const
 {
 	return particles;
+}
+
+sf::FloatRect ParticleSystem::get_container_rect() const
+{
+	return sf::FloatRect{ UPPER_LEFT, BOTTOM_RIGHT - UPPER_LEFT };
 }

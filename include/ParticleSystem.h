@@ -3,7 +3,7 @@
 #include <memory>
 #include "EntropyCounter.h"
 #include <SFML/System/Vector2.hpp>
-
+#include <SFML/Graphics/Rect.hpp>
 
 struct Particle;
 
@@ -37,5 +37,7 @@ public:
 	bool update(double delta_time); 
 
 	const std::vector<Particle>& get_particles() const;
+
+	sf::FloatRect get_container_rect() const;
 };
 

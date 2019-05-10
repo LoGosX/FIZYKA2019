@@ -8,8 +8,17 @@
 Engine::Engine(int window_width, int window_height, const char * window_title)
 {
 	std::cout << "Initializing systems.\n";
+	
+	//window has a shape of square until window resizing is not handled properly
+	if (window_height > window_width)
+		window_width = window_height;
+	if (window_width > window_height)
+		window_height = window_width;
+
 	render_system = std::unique_ptr<RenderSystem>(new RenderSystem(window_width, window_height, window_title));
 	particle_system = std::unique_ptr<ParticleSystem>(new ParticleSystem(constants::PARTICLES_COUNT, constants::R)); //TODO: load values from file (?)
+
+	render_system->setup_particle_container(particle_system->get_container_rect());
 }
 
 Engine::~Engine()
@@ -59,6 +68,7 @@ bool Engine::update(double delta_time)
 bool Engine::draw()
 {
 	render_system->clear();
+	render_system->draw_particles_container();
 	render_system->draw_particles(particle_system->get_particles());
 	render_system->display();
 
