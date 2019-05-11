@@ -10,7 +10,13 @@ namespace utils
 	float magnitude(const sf::Vector2f& a) { return sqrtf(sqr_magnitude(a)); }
 	float sqr_distance(const sf::Vector2f& a, const sf::Vector2f& b) { return sqr_magnitude(a - b); }
 	float distance(const sf::Vector2f& a, const sf::Vector2f& b) { return sqrtf(sqr_distance(a, b)); }
+	
+	template<typename T>
+	float dot(const sf::Vector2<T>& a, const sf::Vector2<T>& b){ return a.x * b.x + a.y * b.y;}
+	
+	sf::Vector2f normalize(const sf::Vector2f& a){ return a / magnitude(a); }
 
+	
 	namespace random
 	{
 		std::mt19937 _mt;
