@@ -18,7 +18,7 @@ namespace utils
 
 		//returns a random float number from range [a, b]. Default range is [0, 1]
 		float rand(float a = 0.f, float b = 1.f) { return _dist(_mt) * (b - a) + a; }
-		//returns a random value from range [a, b]
-		int randint(int a, int b) { return (int)((_dist(_mt) + .5f) * (b - a) + a); }
+		//returns a random integer value from range [a, b]
+		int randint(int a, int b) { return (int)((_dist(_mt)) * (b - a) + a + .5f); }
 	}
 };
