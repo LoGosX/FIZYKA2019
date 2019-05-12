@@ -50,11 +50,11 @@ void ParticleSystem::update_particles_collisions()
 	{
 		for (int j = i+1; j < particles.size(); j++)
 		{
-			if (particles[i].position.x - particles[j].position.x <= PARTICLE_RADIUS) //collisions possible
+			if (particles[i].position.x - particles[j].position.x <= 2 * PARTICLE_RADIUS) //collisions possible
 			{
 				sf::Vector2f L = particles[j].position - particles[i].position;
 				float distanceSquared = L.x*L.x + L.y * L.y;
-				if (distanceSquared <= PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
+				if (distanceSquared <= 4 * PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
 				{
 					sf::Vector2f FirstParallel = (particles[i].velocity.x * L.x + particles[i].velocity.y * L.y) / distanceSquared * L,
 						SecondParallel = (particles[j].velocity.x * L.x + particles[j].velocity.y * L.y) / distanceSquared * L,
