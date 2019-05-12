@@ -54,15 +54,23 @@ void ParticleSystem::update_particles_collisions()
 			{
 				sf::Vector2f L = particles[j].position - particles[i].position;
 				float distanceSquared = L.x*L.x + L.y * L.y;
-				if (distanceSquared <= PARTICLE_RADIUS*PARTICLE_RADIUS) //collision(not rly)
+				if (distanceSquared <= PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
 				{
 					sf::Vector2f FirstParallel = (particles[i].velocity.x * L.x + particles[i].velocity.y * L.y) / distanceSquared * L,
 						SecondParallel = (particles[j].velocity.x * L.x + particles[j].velocity.y * L.y) / distanceSquared * L,
 						FirstPerpendicular = particles[i].velocity - FirstParallel,
 						SecondPerpendicular = particles[j].velocity - SecondParallel;
-					FirstPerpendicular += SecondParallel;
-					SecondPerpendicular += FirstParallel;
-					if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0)//getting closer
+					if (FirstParallel.x*SecondParallel.x > 0)//same direction
+					{
+						FirstPerpendicular -= SecondParallel;
+						SecondPerpendicular -= FirstParallel;
+					}
+					else
+					{
+						FirstPerpendicular += SecondParallel;
+						SecondPerpendicular += FirstParallel;
+					}
+					if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0)//collision
 					{
 						particles[i].velocity = FirstParallel + FirstPerpendicular;
 						particles[j].velocity = SecondParallel + SecondPerpendicular;
