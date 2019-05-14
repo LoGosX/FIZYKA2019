@@ -12,15 +12,21 @@ RenderSystem::RenderSystem(int window_width, int window_height, const char* wind
 	window = std::unique_ptr<sf::RenderWindow>(new sf::RenderWindow(sf::VideoMode(window_width, window_height), window_title, sf::Style::Close)); //sf::Style::Close until resizing is properly handled
 	//set particle sprite
 	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS);
-	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
 	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
+	switch (constants::FUN)
+	{
+	case 1:
+		particle_texture.loadFromFile("jer.png");
+		particle_sprite.setTexture(&particle_texture);
+		break;
+	default:
+		particle_sprite.setFillColor(constants::PARTICLE_COLOR);
+		break;
+	}
 	sf::View view;
 	view.setCenter(0, 0);
 	view.setSize(2 * constants::R, 2 * constants::R);
 	window->setView(view);
-	
-
-	//window->setVerticalSyncEnabled(true);
 }
 
 
