@@ -16,7 +16,7 @@ RenderSystem::RenderSystem(int window_width, int window_height, const char* wind
 	switch (constants::FUN)
 	{
 	case 1:
-		particle_texture.loadFromFile("jer.png");
+		particle_texture.loadFromFile("..\\txt\\jer.png");
 		particle_sprite.setTexture(&particle_texture);
 		break;
 	default:
