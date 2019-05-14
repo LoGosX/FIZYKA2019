@@ -20,6 +20,9 @@ class ParticleSystem
 
 	std::unique_ptr<EntropyCounter> _enCounter; // This is my stuff to count a entropy of the system
 
+	void printVelocitySum();
+	void printArrangement();
+
 	void spawn_particles();
 	void update_positions(double delta_time);
 	void update_wall_collisions();
