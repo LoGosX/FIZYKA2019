@@ -29,13 +29,12 @@ void Engine::run()
 {
 	std::cout << "Running engine.\n";
 	is_running = true;
-	auto start = std::chrono::high_resolution_clock::now();
+	auto duration_cast = [](auto t){ return std::chrono::duration_cast<std::chrono::nanoseconds>(t).count(); };
+	size_t frame = 1;
 	while (is_running)
-	{
-		auto now = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> delta_time(now - start);
-		start = now;
-		bool result = update(delta_time.count());
+	{	
+		auto time_point1 = std::chrono::high_resolution_clock::now();
+		bool result = update(constants::DELTA_TIME);
 		if (!result)
 		{
 			std::cout << "Engine::update() failure. Aborting.\n";
@@ -43,14 +42,23 @@ void Engine::run()
 			break;
 		}
 
+		auto time_point2 = std::chrono::high_resolution_clock::now();
 		result = draw();
-
 		if (!result)
 		{
 			std::cout << "Engine::draw() failure. Aborting.\n";
 			is_running = false;
 			break;
 		}
+
+		auto time_point3 = std::chrono::high_resolution_clock::now();
+
+
+		std::printf("Frame %d\n", frame++);
+		std::printf("PhysicSystem::update() - %8d ns\n",   duration_cast(time_point2 - time_point1));
+		std::printf("RenderSystem::draw()   - %8d ns\n", duration_cast(time_point3 - time_point2));
+		std::printf("Total frame time       - %8d ns\n\n", duration_cast(time_point3 - time_point1));
+
 
 		if (!render_system->is_window_open())
 			is_running = false;

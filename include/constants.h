@@ -8,7 +8,8 @@ namespace constants
 	const float PARTICLE_RADIUS = 0.1f;
 	const float R = 10.f;
 	const float W = 10000.f;
-	const size_t PARTICLES_COUNT = 10000;
+	const size_t PARTICLES_COUNT = 1000;
+	const float DELTA_TIME = 1.f / (2 * W);
 
 	//Drawing constants
 	const sf::Color PARTICLE_COLOR = sf::Color::Green;
