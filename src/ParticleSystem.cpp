@@ -16,11 +16,14 @@ ParticleSystem::~ParticleSystem()
 
 bool ParticleSystem::update(double delta_time)
 {
+	updates_count++;
 	update_positions(delta_time);
 	update_wall_collisions();
 	update_particles_collisions();
 	return true;
 }
+
+int ParticleSystem::num_of_updates() const { return updates_count; }
 
 void ParticleSystem::spawn_particles()
 {
@@ -29,9 +32,9 @@ void ParticleSystem::spawn_particles()
 	{
 		float vx = utils::random::rand(-max_vel, max_vel);
 		float vy = utils::random::rand(-max_vel, max_vel);
-		float x = utils::random::rand(-constants::R, constants::R);
+		float x = utils::random::rand(-constants::R, -0.3f * constants::R);
 		float y = utils::random::rand(-constants::R, constants::R);
-		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } });
+		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } *constants::INITIAL_VELOCITY_MODIFIER });
 	}
 }
 

@@ -19,9 +19,14 @@ class RenderSystem
 	float zoom_amount{ 1.1f };
 	bool mouse_down{ false };
 	bool mouse_moved{ false };
+	bool window_closed{ false };
 	sf::Vector2f last_mouse_global_position, current_mouse_global_position;
 	sf::Vector2i last_mouse_local_position, current_mouse_local_position;
 	void move_view(); //move view resulting from mouse drag
+	int window_width;
+	int window_height;
+	const char* window_title;
+	int updates_count{0}; //incremented whenever window->display is called
 public:
 	RenderSystem(int window_width, int window_height, const char* window_title);
 	~RenderSystem();
@@ -33,5 +38,7 @@ public:
 	bool display();
 	bool clear();
 	bool handle_input();
+	bool initialize(); //initialize OpenGL context through SFML
+	int num_of_updates() const;
 };
 

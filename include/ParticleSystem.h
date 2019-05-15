@@ -27,6 +27,7 @@ class ParticleSystem
 	void update_positions(double delta_time);
 	void update_wall_collisions();
 	void update_particles_collisions();
+	int updates_count{0}; //incremented whenever update(...) is called
 public:
 	/*
 	particle_count - how many particles to spawn
@@ -36,6 +37,8 @@ public:
 
 	ParticleSystem(int particle_count, float R);
 	~ParticleSystem();
+
+	int num_of_updates() const;
 
 	bool update(double delta_time); 
 
