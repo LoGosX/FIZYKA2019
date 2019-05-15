@@ -41,9 +41,61 @@ void ParticleSystem::update_positions(double delta_time)
 		p.position += p.velocity * (float)delta_time;
 }
 
+void ParticleSystem::printVelocitySum()
+{
+	double sum = 0;
+	for (auto p : particles)
+	{
+		sum += p.velocity.x*p.velocity.x + p.velocity.y* p.velocity.y;
+	}
+	std::cout << sum << "\n";
+}
+
+void ParticleSystem::printArrangement()
+{
+	long long left = 0, right = 0;
+	for (auto p : particles)
+	{
+		if (p.position.x <= 0)
+			left++;
+		else
+			right++;
+	}
+	std::cout << left << " : " << right << "\n";
+}
+
+
 void ParticleSystem::update_particles_collisions()
 {
-	//TODO
+	float PARTICLE_RADIUS = constants::PARTICLE_RADIUS;
+	std::sort(particles.begin(), particles.end(), [](Particle A, Particle B) { return (A.position.x > B.position.x); });
+
+	for (int i = 0; i < particles.size(); i++)
+	{
+		for (int j = i+1; j < particles.size(); j++)
+		{
+			if (particles[i].position.x - particles[j].position.x <= 2 * PARTICLE_RADIUS) //collisions possible
+			{
+				sf::Vector2f L = particles[j].position - particles[i].position;
+				float distanceSquared = L.x*L.x + L.y * L.y;
+				if (distanceSquared <= 4 * PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
+				{
+					sf::Vector2f FirstParallel = (particles[i].velocity.x * L.x + particles[i].velocity.y * L.y) / distanceSquared * L,
+						SecondParallel = (particles[j].velocity.x * L.x + particles[j].velocity.y * L.y) / distanceSquared * L,
+						FirstPerpendicular = particles[i].velocity - FirstParallel,
+						SecondPerpendicular = particles[j].velocity - SecondParallel;
+					if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0) //collision
+					{
+						particles[i].velocity = FirstPerpendicular + SecondParallel;
+						particles[j].velocity = SecondPerpendicular + FirstParallel;
+					}
+				}
+			}
+			else //no more collisions for this particle
+				break;
+		}
+	}
+
 }
 
 void ParticleSystem::update_wall_collisions()

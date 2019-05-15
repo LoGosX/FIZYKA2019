@@ -10,7 +10,6 @@
 RenderSystem::RenderSystem(int window_width, int window_height, const char* window_title)
 {
 	window = std::unique_ptr<sf::RenderWindow>(new sf::RenderWindow(sf::VideoMode(window_width, window_height), window_title, sf::Style::Close)); //sf::Style::Close until resizing is properly handled
-	
 	//set particle sprite
 	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS);
 	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
