@@ -13,6 +13,8 @@ class RenderSystem
 	std::unique_ptr<sf::RenderWindow> window;
 	sf::CircleShape particle_sprite;
 	sf::RectangleShape container;
+	sf::VertexArray va; //used for drawing particles in one draw call
+	sf::VertexBuffer vb;
 
 	// If zoom_amount is 1.1f, it will zoom in or out by 10 % ;
 	// if zoom_amount is 1.3f, it will zoom in or out by 30 % .

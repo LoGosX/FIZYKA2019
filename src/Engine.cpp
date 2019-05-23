@@ -27,80 +27,82 @@ Engine::~Engine()
 
 void Engine::run()
 {
-	std::cout << "Running engine.\n";
-	is_running = true;
-	auto duration_cast = [](auto t){ return std::chrono::duration_cast<std::chrono::nanoseconds>(t).count(); };
-	size_t frame = 1;
-	// while (is_running)
-	// {	
-	// 	auto time_point1 = std::chrono::high_resolution_clock::now();
-	// 	bool result = update(constants::DELTA_TIME);
-	// 	if (!result)
-	// 	{
-	// 		std::cout << "Engine::update() failure. Aborting.\n";
-	// 		is_running = false;
-	// 		break;
-	// 	}
-
-	// 	auto time_point2 = std::chrono::high_resolution_clock::now();
-	// 	result = draw();
-	// 	if (!result)
-	// 	{
-	// 		std::cout << "Engine::draw() failure. Aborting.\n";
-	// 		is_running = false;
-	// 		break;
-	// 	}
-
-	// 	auto time_point3 = std::chrono::high_resolution_clock::now();
-
-
-	// 	std::printf("Frame %d\n", frame++);
-	// 	std::printf("PhysicSystem::update() - %8d ns\n",   duration_cast(time_point2 - time_point1));
-	// 	std::printf("RenderSystem::draw()   - %8d ns\n", duration_cast(time_point3 - time_point2));
-	// 	std::printf("Total frame time       - %8d ns\n\n", duration_cast(time_point3 - time_point1));
-
-
-	// 	if (!render_system->is_window_open())
-	// 		is_running = false;
-	// }
-
-	std::cout << "Starting render_thread\n";
-	render_thread = std::thread([this]{
-		this->render_system->initialize();
-		while(this->render_system->is_window_open())
-		{
-			this->render_system->handle_input();
-			this->render_system->clear();
-			this->render_system->draw_particles_container();
-			this->render_system->draw_particles(this->particle_system->get_particles());
-			this->render_system->display();
-
-			//while(this->render_system->num_of_updates() > this->particle_system->num_of_updates()); //synchronize both threads
-		}
-	});
-
-	
-	std::cout << "Starting physic_thread\n";
-	physic_thread = std::thread([this]{
-		while(this->render_system->is_window_open())
-		{
-			this->particle_system->update(constants::DELTA_TIME);
-
-			//while(this->render_system->num_of_updates() < this->particle_system->num_of_updates()); //synchronize both threads
-		}
-	});
-
-	std::cout << "Threads started. Waiting for join()\n";
-	
-	while(render_system->is_window_open())
+	const bool PARALLEL = true;
+	if(!PARALLEL)
 	{
-		//......................
-	}
+		render_system->initialize();
+		std::cout << "Running engine.\n";
+		is_running = true;
+		auto duration_cast = [](auto t){ return std::chrono::duration_cast<std::chrono::nanoseconds>(t).count(); };
+		size_t frame = 1;
+		while (is_running)
+		{	
+			auto time_point1 = std::chrono::high_resolution_clock::now();
+	 		bool result = update(constants::DELTA_TIME);
+	 		if (!result)
+	 		{
+	 			std::cout << "Engine::update() failure. Aborting.\n";
+	 			is_running = false;
+	 			break;
+			}
+			auto time_point2 = std::chrono::high_resolution_clock::now();
+			result = draw();
+			if (!result)
+			{
+				std::cout << "Engine::draw() failure. Aborting.\n";
+				is_running = false;
+				break;
+			}
+			auto time_point3 = std::chrono::high_resolution_clock::now();
+			std::printf("Frame %d\n", frame++);
+			std::printf("PhysicSystem::update() - %8d ns\n",   duration_cast(time_point2 - time_point1));
+			std::printf("RenderSystem::draw()   - %8d ns\n", duration_cast(time_point3 - time_point2));
+			std::printf("Total frame time       - %8d ns\n\n", duration_cast(time_point3 - time_point1));
+			if (!render_system->is_window_open())
+				is_running = false;
+			std::cout << std::flush;
+		}
+	}else
+	{
 
-	render_thread.join();
-	physic_thread.join();
-	std::cout << "Threads joined\n";
-	std::cout << "Engine stopped.\n";
+		std::cout << "Starting render_thread\n";
+		render_thread = std::thread([this]{
+			this->render_system->initialize();
+			while(this->render_system->is_window_open())
+			{
+				this->render_system->handle_input();
+				this->render_system->clear();
+				this->render_system->draw_particles_container();
+				this->render_system->draw_particles(this->particle_system->get_particles());
+				this->render_system->display();
+
+				while(this->render_system->num_of_updates() > this->particle_system->num_of_updates()); //synchronize both threads
+			}
+		});
+
+
+		std::cout << "Starting physic_thread\n";
+		physic_thread = std::thread([this]{
+			while(this->render_system->is_window_open())
+			{
+				this->particle_system->update(constants::DELTA_TIME);
+
+				while(this->render_system->num_of_updates() <= this->particle_system->num_of_updates()); //synchronize both threads
+			}
+		});
+
+		std::cout << "Threads started. Waiting for join()\n";
+
+		while(render_system->is_window_open())
+		{
+			//......................
+		}
+
+		render_thread.join();
+		physic_thread.join();
+		std::cout << "Threads joined\n";
+		std::cout << "Engine stopped.\n";
+	}
 }
 
 bool Engine::update(double delta_time)

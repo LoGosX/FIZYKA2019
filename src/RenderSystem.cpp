@@ -15,14 +15,17 @@ RenderSystem::RenderSystem(int window_width, int window_height, const char* wind
 bool RenderSystem::initialize()
 {
 	window = std::unique_ptr<sf::RenderWindow>(new sf::RenderWindow(sf::VideoMode(window_width, window_height), window_title, sf::Style::Close)); //sf::Style::Close until resizing is properly handled
-	//set particle sprite
-	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS);
-	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
-	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
+
+	vb.create(constants::PARTICLES_COUNT + 3 * constants::PARTICLES_COUNT * particle_sprite.getPointCount());
+	vb.setPrimitiveType(sf::PrimitiveType::Triangles);
 	sf::View view;
 	view.setCenter(0, 0);
 	view.setSize(2 * constants::R, 2 * constants::R);
 	window->setView(view);
+
+	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, 3);
+	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
+	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 
 	//window->setVerticalSyncEnabled(true);
 	return true;
@@ -39,18 +42,29 @@ bool RenderSystem::is_window_open() const
 
 bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 {
+	bool points = false;
 	sf::FloatRect rect{ window->getView().getCenter() - window->getView().getSize() / 2.f, window->getView().getSize() };
-	sf::VertexArray va(sf::PrimitiveType::Triangles);
 	int pc = particle_sprite.getPointCount();
-	va.resize(particles.size() + 3 * particles.size() * pc);
 	int k = 0;
 	const sf::Vector2f t{constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS};
+	sf::Vertex v;
+	//auto upd = [&, this]{ this->vb.update(&v, 1, k++);};
+	if(points)
+		va.setPrimitiveType(sf::PrimitiveType::Points);
+	else
+		va.setPrimitiveType(sf::PrimitiveType::Triangles);
+	va.clear();
+	//va.resize(particles.size() + 3 * particles.size() * pc);
+	auto upd = [&]{ va.append(v); k++;};
+	//auto drw = [&]{ window->draw(vb, 0, k); }
+	auto drw = [&]{ window->draw(va); };
+
 	for(auto/*&*/ p : particles)
 	{
 		sf::FloatRect r {p.position - t, t * 2.f};
 		if(!rect.intersects(r))
 			continue;
-		sf::Vertex v;
+		
 		float max_vel = constants::W / (2 * constants::PARTICLES_COUNT) * constants::INITIAL_VELOCITY_MODIFIER;
 		auto fraction = utils::dot(p.velocity, p.velocity) / (4 * max_vel * max_vel);
 		int R = 255 * fraction;
@@ -61,24 +75,31 @@ bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 		B = std::max(0, B);
 		B = std::min(255, B);
 		v.color = sf::Color(R, G, B);
-		for(int i = 0; i < pc - 1; i++)
+		if(!points)
 		{
-			v.position = particle_sprite.getPoint(i) + p.position - t;
-			va[k++] = v;
-			v.position = particle_sprite.getPoint(i + 1) + p.position - t;
-			va[k++] = v;
+			for(int i = 0; i < pc - 1; i++)
+			{
+				v.position = particle_sprite.getPoint(i) + p.position - t;
+				upd();
+				v.position = particle_sprite.getPoint(i + 1) + p.position - t;
+				upd();
+				v.position = p.position;
+				upd();
+			}
+			v.position = particle_sprite.getPoint(pc - 1) + p.position - t;
+			upd();
+			v.position = particle_sprite.getPoint(0) + p.position - t;
+			upd();
 			v.position = p.position;
-			va[k++] = v;
+			upd();
+		}else
+		{
+			v.position = p.position;
+			upd();
 		}
-		v.position = particle_sprite.getPoint(pc - 1) + p.position - t;
-		va[k++] = v;
-		v.position = particle_sprite.getPoint(0) + p.position - t;
-		va[k++] = v;
-		v.position = p.position;
-		va[k++] = v;
 	}
-	va.resize(k);
-	window->draw(va);
+	drw();
+	
 	return true;
 }
 
@@ -166,6 +187,24 @@ bool RenderSystem::handle_input()
 				zoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *window, (1.f / zoom_amount));
 			else if (event.mouseWheelScroll.delta < 0)
 				zoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *window, zoom_amount);
+			//set particle sprite
+			auto view_size = window->getView().getSize();
+			float x = utils::sqr_magnitude(view_size) / constants::PARTICLE_RADIUS;
+			int points;
+			if(x < 500)
+				points = 30;
+			else if(x < 1000)
+				points = 20;
+			else if(x < 5000)
+				points = 10;
+			else if(x < 20000)
+				points = 5;
+			else
+				points = 3;
+			std::cout << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
+			particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
+			particle_sprite.setFillColor(constants::PARTICLE_COLOR);
+			particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 		}
 
 		if (event.type == sf::Event::MouseButtonPressed)

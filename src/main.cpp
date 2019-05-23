@@ -2,7 +2,7 @@
 
 int main()
 {
-	Engine* engine = new Engine(800, 600, "FIZYKA?");
+	Engine* engine = new Engine(1600, 1600, "FIZYKA?");
 
 	engine->run();
 
