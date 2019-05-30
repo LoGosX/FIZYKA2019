@@ -6,7 +6,7 @@
 #include "constants.h"
 #include "ParticleSystem.h"
 #include "utils.h"
-
+// #include "GLExtensions.hpp"
 
 RenderSystem::RenderSystem(int window_width, int window_height, const char* window_title) : window_width(window_width), window_height(window_height), window_title(window_title)
 {
@@ -14,10 +14,18 @@ RenderSystem::RenderSystem(int window_width, int window_height, const char* wind
 
 bool RenderSystem::initialize()
 {
+	
 	window = std::unique_ptr<sf::RenderWindow>(new sf::RenderWindow(sf::VideoMode(window_width, window_height), window_title, sf::Style::Close)); //sf::Style::Close until resizing is properly handled
 
-	vb.create(constants::PARTICLES_COUNT + 3 * constants::PARTICLES_COUNT * particle_sprite.getPointCount());
-	vb.setPrimitiveType(sf::PrimitiveType::Triangles);
+	// GLEXT_glGenBuffers(1, &vbo);
+	if(!sf::Shader::isGeometryAvailable())
+		std::cout << "Geometry shader not avaliable!" << std::endl;
+	else
+		std::cout << "Geometry shader avaliable." << std::endl;
+	shader.loadFromFile("..\\shaders\\vertex.glsl", "..\\shaders\\geometry.glsl", "..\\shaders\\fragment.glsl");
+
+
+	veca.reserve(constants::PARTICLES_COUNT * 100); //not exact value
 	sf::View view;
 	view.setCenter(0, 0);
 	view.setSize(2 * constants::R, 2 * constants::R);
@@ -28,6 +36,7 @@ bool RenderSystem::initialize()
 	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 
 	//window->setVerticalSyncEnabled(true);
+	initialized = true;
 	return true;
 }
 
@@ -35,13 +44,20 @@ RenderSystem::~RenderSystem()
 {
 }
 
-bool RenderSystem::is_window_open() const
+const std::atomic<bool>& RenderSystem::is_initialized() const
+{
+	return initialized;
+}
+
+const std::atomic<bool>& RenderSystem::is_window_open() const
 {
 	return !window_closed;
 }
 
 bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 {
+	// GLEXT_glBufferData(GL_ARRAY_BUFFER_ARB, sizeof(Particle) * particles.size(), particles.data(), GL_DYNAMIC_DRAW_ARB);
+
 	bool points = false;
 	sf::FloatRect rect{ window->getView().getCenter() - window->getView().getSize() / 2.f, window->getView().getSize() };
 	int pc = particle_sprite.getPointCount();
@@ -55,9 +71,9 @@ bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 		va.setPrimitiveType(sf::PrimitiveType::Triangles);
 	va.clear();
 	//va.resize(particles.size() + 3 * particles.size() * pc);
-	auto upd = [&]{ va.append(v); k++;};
+	auto upd = [&]{ veca[k++] = v; };
 	//auto drw = [&]{ window->draw(vb, 0, k); }
-	auto drw = [&]{ window->draw(va); };
+	auto drw = [&]{ window->draw(veca.data(), k, sf::PrimitiveType::Triangles); };
 
 	for(auto/*&*/ p : particles)
 	{
@@ -201,7 +217,7 @@ bool RenderSystem::handle_input()
 				points = 5;
 			else
 				points = 3;
-			std::cout << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
+			// std::cout << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
 			particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
 			particle_sprite.setFillColor(constants::PARTICLE_COLOR);
 			particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);

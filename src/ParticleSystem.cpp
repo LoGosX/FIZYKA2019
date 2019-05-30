@@ -71,7 +71,7 @@ void ParticleSystem::printArrangement()
 void ParticleSystem::update_particles_collisions()
 {
 	float PARTICLE_RADIUS = constants::PARTICLE_RADIUS;
-	std::sort(particles.begin(), particles.end(), [](Particle A, Particle B) { return (A.position.y > B.position.y); });
+	std::sort(particles.begin(), particles.end(), [](const Particle& A, const Particle& B) { return (A.position.y > B.position.y); });
 	for (int i = 0; i < particles.size(); i++)
 	{
 		for (int j = i+1; j < particles.size(); j++)

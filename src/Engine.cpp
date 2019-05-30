@@ -4,6 +4,7 @@
 #include "RenderSystem.h"
 #include "ParticleSystem.h"
 #include "constants.h"
+#include <ctime>
 
 Engine::Engine(int window_width, int window_height, const char * window_title)
 {
@@ -27,8 +28,7 @@ Engine::~Engine()
 
 void Engine::run()
 {
-	const bool PARALLEL = true;
-	if(!PARALLEL)
+	if(!constants::PARALLEL)
 	{
 		render_system->initialize();
 		std::cout << "Running engine.\n";
@@ -54,13 +54,15 @@ void Engine::run()
 				break;
 			}
 			auto time_point3 = std::chrono::high_resolution_clock::now();
-			std::printf("Frame %d\n", frame++);
-			std::printf("PhysicSystem::update() - %8d ns\n",   duration_cast(time_point2 - time_point1));
-			std::printf("RenderSystem::draw()   - %8d ns\n", duration_cast(time_point3 - time_point2));
-			std::printf("Total frame time       - %8d ns\n\n", duration_cast(time_point3 - time_point1));
+			if(constants::DEBUG_LOG){
+				std::printf("Frame %d\n", frame++);
+				std::printf("PhysicSystem::update() - %8d ns\n",   duration_cast(time_point2 - time_point1));
+				std::printf("RenderSystem::draw()   - %8d ns\n", duration_cast(time_point3 - time_point2));
+				std::printf("Total frame time       - %8d ns\n\n", duration_cast(time_point3 - time_point1));
+				std::cout << std::flush;
+			}
 			if (!render_system->is_window_open())
 				is_running = false;
-			std::cout << std::flush;
 		}
 	}else
 	{
@@ -75,7 +77,7 @@ void Engine::run()
 				this->render_system->draw_particles_container();
 				this->render_system->draw_particles(this->particle_system->get_particles());
 				this->render_system->display();
-
+	
 				while(this->render_system->num_of_updates() > this->particle_system->num_of_updates()); //synchronize both threads
 			}
 		});
@@ -83,6 +85,7 @@ void Engine::run()
 
 		std::cout << "Starting physic_thread\n";
 		physic_thread = std::thread([this]{
+			while(!this->render_system->is_initialized());
 			while(this->render_system->is_window_open())
 			{
 				this->particle_system->update(constants::DELTA_TIME);
@@ -93,10 +96,13 @@ void Engine::run()
 
 		std::cout << "Threads started. Waiting for join()\n";
 
+		/*
 		while(render_system->is_window_open())
 		{
 			//......................
 		}
+		*/
+		
 
 		render_thread.join();
 		physic_thread.join();
