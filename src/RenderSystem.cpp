@@ -22,7 +22,8 @@ bool RenderSystem::initialize()
 		std::cout << "Geometry shader not avaliable!" << std::endl;
 	else
 		std::cout << "Geometry shader avaliable." << std::endl;
-	shader.loadFromFile("..\\shaders\\vertex.glsl", "..\\shaders\\geometry.glsl", "..\\shaders\\fragment.glsl");
+	if(!shader.loadFromFile("..\\shaders\\vertex.glsl", "..\\shaders\\geometry.glsl", "..\\shaders\\fragment.glsl"))
+		std::cout << "Could not load shaders" << std::endl;
 
 
 	veca.reserve(constants::PARTICLES_COUNT * 100); //not exact value
@@ -37,6 +38,7 @@ bool RenderSystem::initialize()
 
 	//window->setVerticalSyncEnabled(true);
 	initialized = true;
+	window_open = true;
 	return true;
 }
 
@@ -51,7 +53,7 @@ const std::atomic<bool>& RenderSystem::is_initialized() const
 
 const std::atomic<bool>& RenderSystem::is_window_open() const
 {
-	return !window_closed;
+	return window_open;
 }
 
 bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
@@ -75,7 +77,7 @@ bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 	//auto drw = [&]{ window->draw(vb, 0, k); }
 	auto drw = [&]{ window->draw(veca.data(), k, sf::PrimitiveType::Triangles); };
 
-	for(auto/*&*/ p : particles)
+	for(auto p : particles)
 	{
 		sf::FloatRect r {p.position - t, t * 2.f};
 		if(!rect.intersects(r))
@@ -175,7 +177,7 @@ bool RenderSystem::handle_input()
 		if (event.type == sf::Event::Closed)
 		{
 			window->close();
-			window_closed = true;
+			window_open = false;
 		}
 		
 		// catch the resize events

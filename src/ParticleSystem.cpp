@@ -28,12 +28,16 @@ int ParticleSystem::num_of_updates() const { return updates_count; }
 void ParticleSystem::spawn_particles()
 {
 	float max_vel = constants::W / (2 * PARTICLE_COUNT);
+	particle_indexes.resize(constants::PARTICLES_COUNT);
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
+		particle_indexes[i] = i;
+
 		float vx = utils::random::rand(-max_vel, max_vel);
 		float vy = utils::random::rand(-max_vel, max_vel);
 		float x = utils::random::rand(-constants::R, -0.25f * constants::R);
 		float y = utils::random::rand(-constants::R, constants::R);
+
 		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } * constants::INITIAL_VELOCITY_MODIFIER });
 	}
 }
@@ -71,25 +75,26 @@ void ParticleSystem::printArrangement()
 void ParticleSystem::update_particles_collisions()
 {
 	float PARTICLE_RADIUS = constants::PARTICLE_RADIUS;
-	std::sort(particles.begin(), particles.end(), [](const Particle& A, const Particle& B) { return (A.position.y > B.position.y); });
-	for (int i = 0; i < particles.size(); i++)
+	std::sort(particle_indexes.begin(), particle_indexes.end(), [&](int a, int b) { return (particles[a].position.y > particles[b].position.y); });
+	for (int i = 0; i < particle_indexes.size(); i++)
 	{
-		for (int j = i+1; j < particles.size(); j++)
+		for (int j = i+1; j < particle_indexes.size(); j++)
 		{
-			if (particles[i].position.y - particles[j].position.y <= 2 * PARTICLE_RADIUS) //collisions possible
+			Particle &a = particles[particle_indexes[i]], &b = particles[particle_indexes[j]];
+			if (a.position.y - b.position.y <= 2 * PARTICLE_RADIUS) //collisions possible
 			{
-				sf::Vector2f L = particles[j].position - particles[i].position;
+				sf::Vector2f L = b.position - a.position;
 				float distanceSquared = L.x*L.x + L.y * L.y;
 				if (distanceSquared <= 4 * PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
 				{
-					sf::Vector2f FirstParallel = (particles[i].velocity.x * L.x + particles[i].velocity.y * L.y) / distanceSquared * L,
-						SecondParallel = (particles[j].velocity.x * L.x + particles[j].velocity.y * L.y) / distanceSquared * L,
-						FirstPerpendicular = particles[i].velocity - FirstParallel,
-						SecondPerpendicular = particles[j].velocity - SecondParallel;
+					sf::Vector2f FirstParallel = (a.velocity.x * L.x + a.velocity.y * L.y) / distanceSquared * L,
+						SecondParallel = (b.velocity.x * L.x + b.velocity.y * L.y) / distanceSquared * L,
+						FirstPerpendicular = a.velocity - FirstParallel,
+						SecondPerpendicular = b.velocity - SecondParallel;
 					if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0) //collision
 					{
-						particles[i].velocity = FirstPerpendicular + SecondParallel;
-						particles[j].velocity = SecondPerpendicular + FirstParallel;
+						a.velocity = FirstPerpendicular + SecondParallel;
+						b.velocity = SecondPerpendicular + FirstParallel;
 					}
 				}
 			}

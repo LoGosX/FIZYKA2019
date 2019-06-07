@@ -17,6 +17,7 @@ class ParticleSystem
 	const int PARTICLE_COUNT;
 	const sf::Vector2f UPPER_LEFT, BOTTOM_RIGHT;
 	std::vector<Particle> particles;
+	std::vector<int> particle_indexes; //used to sort particles. Ask M. Falb why
 
 	std::unique_ptr<EntropyCounter> _enCounter; // This is my stuff to count a entropy of the system
 

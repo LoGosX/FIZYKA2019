@@ -13,9 +13,8 @@ class Engine
 	std::unique_ptr<ParticleSystem> particle_system;
 	std::thread render_thread;
 	std::thread physic_thread;
-	std::atomic<bool> _x;
-
-	bool is_running{ false };
+	std::atomic<bool> running { true };
+	
 public:
 	Engine(int window_width, int window_height, const char* window_title);
 	~Engine();

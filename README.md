@@ -25,13 +25,12 @@ from ```build``` directory.
 This chain of commands should clone repository and build it using cmake:
 ```bash
 git clone --recurse-submodules https://github.com/LoGosX/FIZYKA2019
-cd FIZYKA2019
-cd build
+cd FIZYKA2019/build
 cmake ..
 cmake --build . --config Release
+./FIZYKA2019
 ```
 
-You can find the executable in ```FIZYKA2019/build/Release/FIZYKA2019``` or in ```FIZYKA2019/build/FIZYKA2019```.
 
 # Dependencies:
 To build this project the only thing that needs to be installed is ```cmake``` program.
