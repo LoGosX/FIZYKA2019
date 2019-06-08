@@ -46,5 +46,7 @@ public:
 	const std::vector<Particle>& get_particles() const;
 
 	sf::FloatRect get_container_rect() const;
+
+	EntropyCounter* get_entropy_counter() { return _enCounter.get(); } 
 };
 

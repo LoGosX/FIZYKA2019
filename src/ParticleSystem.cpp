@@ -7,6 +7,7 @@
 
 ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ -R, -R }), BOTTOM_RIGHT(sf::Vector2f{ R, R })
 {
+	_enCounter = std::make_unique<EntropyCounter>();
 	spawn_particles();
 }
 
@@ -19,11 +20,8 @@ bool ParticleSystem::update(double delta_time)
 	update_positions(delta_time);
 	update_wall_collisions();
 	update_particles_collisions();
-	updates_count++;
 	return true;
 }
-
-int ParticleSystem::num_of_updates() const { return updates_count; }
 
 void ParticleSystem::spawn_particles()
 {
@@ -55,7 +53,7 @@ void ParticleSystem::printVelocitySum()
 	{
 		sum += p.velocity.x*p.velocity.x + p.velocity.y* p.velocity.y;
 	}
-	std::cout << sum << "\n";
+	std::cerr << sum << "\n";
 }
 
 void ParticleSystem::printArrangement()
@@ -68,7 +66,7 @@ void ParticleSystem::printArrangement()
 		else
 			right++;
 	}
-	std::cout << left << " : " << right << "\n";
+	std::cerr << left << " : " << right << "\n";
 }
 
 

@@ -25,8 +25,6 @@ class RenderSystem
 	int window_width;
 	int window_height;
 	const char* window_title;
-	int updates_count{0}; //incremented whenever window->display is called
-
 
 	//drawing and OPENGL variables
 	sf::CircleShape particle_sprite;
@@ -36,6 +34,8 @@ class RenderSystem
 	unsigned int vbo;
 	unsigned int vao;
 	sf::Shader shader;
+
+	void update_particle_sprite();
 public:
 	RenderSystem(int window_width, int window_height, const char* window_title);
 	~RenderSystem();
@@ -49,6 +49,5 @@ public:
 	bool clear();
 	bool handle_input();
 	bool initialize(); //initialize OpenGL context through SFML
-	int num_of_updates() const;
 };
 

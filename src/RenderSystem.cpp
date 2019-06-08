@@ -19,11 +19,11 @@ bool RenderSystem::initialize()
 
 	// GLEXT_glGenBuffers(1, &vbo);
 	if(!sf::Shader::isGeometryAvailable())
-		std::cout << "Geometry shader not avaliable!" << std::endl;
+		std::cerr << "Geometry shader not avaliable!" << std::endl;
 	else
-		std::cout << "Geometry shader avaliable." << std::endl;
+		std::cerr << "Geometry shader avaliable." << std::endl;
 	if(!shader.loadFromFile("..\\shaders\\vertex.glsl", "..\\shaders\\geometry.glsl", "..\\shaders\\fragment.glsl"))
-		std::cout << "Could not load shaders" << std::endl;
+		std::cerr << "Could not load shaders" << std::endl;
 
 
 	veca.reserve(constants::PARTICLES_COUNT * 100); //not exact value
@@ -37,6 +37,11 @@ bool RenderSystem::initialize()
 	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 
 	//window->setVerticalSyncEnabled(true);
+	window->setFramerateLimit(60);
+
+	setup_particle_container(sf::FloatRect(-0.5 * constants::R, -0.5 * constants::R, constants::R, constants::R));
+	update_particle_sprite();
+
 	initialized = true;
 	window_open = true;
 	return true;
@@ -144,7 +149,6 @@ bool RenderSystem::draw_particles_container()
 
 bool RenderSystem::display()
 {
-	updates_count++;
 	window->display();
 	return true;
 }
@@ -155,7 +159,6 @@ bool RenderSystem::clear()
 	return true;
 }
 
-int RenderSystem::num_of_updates() const{ return updates_count; }
 
 void zoomViewAt(sf::Vector2i pixel, sf::RenderWindow& window, float zoom)
 {
@@ -167,6 +170,27 @@ void zoomViewAt(sf::Vector2i pixel, sf::RenderWindow& window, float zoom)
 	const sf::Vector2f offsetCoords{ beforeCoord - afterCoord };
 	view.move(offsetCoords);
 	window.setView(view);
+}
+
+void RenderSystem::update_particle_sprite()
+{
+	auto view_size = window->getView().getSize();
+	float x = utils::sqr_magnitude(view_size) / constants::PARTICLE_RADIUS;
+	int points;
+	if(x < 500)
+		points = 30;
+	else if(x < 1000)
+		points = 20;
+	else if(x < 5000)
+		points = 10;
+	else if(x < 20000)
+		points = 5;
+	else
+		points = 3;
+	// std::cerr << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
+	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
+	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
+	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 }
 
 bool RenderSystem::handle_input()
@@ -206,23 +230,7 @@ bool RenderSystem::handle_input()
 			else if (event.mouseWheelScroll.delta < 0)
 				zoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *window, zoom_amount);
 			//set particle sprite
-			auto view_size = window->getView().getSize();
-			float x = utils::sqr_magnitude(view_size) / constants::PARTICLE_RADIUS;
-			int points;
-			if(x < 500)
-				points = 30;
-			else if(x < 1000)
-				points = 20;
-			else if(x < 5000)
-				points = 10;
-			else if(x < 20000)
-				points = 5;
-			else
-				points = 3;
-			// std::cout << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
-			particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
-			particle_sprite.setFillColor(constants::PARTICLE_COLOR);
-			particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
+			update_particle_sprite();
 		}
 
 		if (event.type == sf::Event::MouseButtonPressed)

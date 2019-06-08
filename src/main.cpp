@@ -21,7 +21,7 @@ int main(int argc, char ** args)
 	Engine* engine = new Engine(width, height, "FIZYKA?");
 	try
 	{
-		std::cout << "Running engine" << std::endl; 
+		std::cerr << "Running engine" << std::endl; 
 		engine->run();
 	}
 	catch(const std::exception& e)
