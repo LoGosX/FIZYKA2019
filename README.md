@@ -33,9 +33,9 @@ cmake --build . --config Release
 
 
 # Dependencies:
-To build this project the only thing that needs to be installed is ```cmake``` program.
+To build this project, ```cmake``` program needs to be installed.
 ## Linux dependencies
-These packages reguired to make SFML work on Linux.
+These packages required to make SFML work on Linux.
 + freetype
 + x11
 + xrandr
@@ -53,3 +53,11 @@ You can use following commands to install those on Ubuntu:
 ```bash
 sudo apt-get install -y libpthread-stubs0-dev libgl1-mesa-dev libx11-dev libxrandr-dev libfreetype6-dev libglew1.5-dev libjpeg8-dev libsndfile1-dev libopenal-dev libudev-dev libxcb-image0-dev libjpeg-dev libflac-dev
 ```
+## Python
+In order to be able to run the simulation from the Python script (and draw the entropy graph), you need Python 3 with ```matplotlib``` package.
+
+To install matplotlib, run
+```bash
+pip install matplotlib
+```
+on your chosen Python environment.
