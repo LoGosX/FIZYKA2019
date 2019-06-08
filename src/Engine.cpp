@@ -108,7 +108,7 @@ void Engine::run()
 			}
 		});
 		
-
+		entropy_log_thread.join();
 		render_thread.join();
 		physic_thread.join();
 		std::cerr << "Threads joined\n";
