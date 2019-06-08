@@ -8,7 +8,7 @@ namespace constants
 	const float PARTICLE_RADIUS = 0.1f;
 	const float R = 10.f;
 	const float W = 10.0f;
-	const size_t PARTICLES_COUNT = 1000;
+	const size_t PARTICLES_COUNT = 5000;
 	const float DELTA_TIME = 1.f / (2 * W);
 	const float INITIAL_VELOCITY_MODIFIER = 10.f;
 
@@ -16,7 +16,7 @@ namespace constants
 	const sf::Color PARTICLE_COLOR = sf::Color::Green;
 	const sf::Color CONTAINER_OUTLINE_COLOR = sf::Color::Green;
 	const sf::Color CONTAINER_FILL_COLOR = sf::Color::Black;
-	const float CONTAINER_OUTLINE_THICKNESS = 1.f;
+	const float CONTAINER_OUTLINE_THICKNESS = 0.1f;
 
 
 	//Other constants

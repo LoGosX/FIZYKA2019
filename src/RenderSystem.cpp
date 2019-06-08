@@ -39,7 +39,7 @@ bool RenderSystem::initialize()
 	//window->setVerticalSyncEnabled(true);
 	window->setFramerateLimit(60);
 
-	setup_particle_container(sf::FloatRect(-0.5 * constants::R, -0.5 * constants::R, constants::R, constants::R));
+	setup_particle_container(sf::FloatRect(-constants::R, -constants::R, 2 * constants::R, 2 * constants::R));
 	update_particle_sprite();
 
 	initialized = true;
