@@ -37,7 +37,7 @@ void ParticleSystem::spawn_particles()
 		float vx = utils::random::rand(-max_vel, max_vel);
 		float vy = utils::random::rand(-max_vel, max_vel);
 		float x = utils::random::rand(-constants::R, -0.25f * constants::R);
-		float y = utils::random::rand(-constants::R, constants::R);
+		float y = utils::random::rand(-constants::R, -0.25f * constants::R);
 
 		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } * constants::INITIAL_VELOCITY_MODIFIER });
 	}

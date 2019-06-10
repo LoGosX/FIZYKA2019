@@ -187,11 +187,15 @@ void RenderSystem::update_particle_sprite()
 	else if(x < 20000)
 		points_n = 5;
 	else
+	{
+		points_n = 5;
 		points = true;
+	}
+	points = false;
 	if(!points)
 	{
 		// std::cerr << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
-		particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
+		particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points_n);
 		particle_sprite.setFillColor(constants::PARTICLE_COLOR);
 		particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 	}	
