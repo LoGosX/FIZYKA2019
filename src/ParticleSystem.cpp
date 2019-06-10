@@ -5,8 +5,14 @@
 #include "Particle.h"
 #include "utils.h"
 
-ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ -R, -R }), BOTTOM_RIGHT(sf::Vector2f{ R, R })
+ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ -R, -R }), BOTTOM_RIGHT(sf::Vector2f{ R, R }), cell_size(2 * constants::PARTICLE_RADIUS * constants::CELL_FACTOR)
 {
+	size_t width = BOTTOM_RIGHT.x - UPPER_LEFT.x,
+		height = BOTTOM_RIGHT.y - UPPER_LEFT.y;
+	particle_cells.resize(width / cell_size + 1);
+	for (int i =0;i<particle_cells.size();i++)
+		particle_cells[i].resize(height / cell_size + 1);
+
 	_enCounter = std::make_unique<EntropyCounter>();
 	spawn_particles();
 }
@@ -26,11 +32,8 @@ bool ParticleSystem::update(double delta_time)
 void ParticleSystem::spawn_particles()
 {
 	float max_vel = constants::W / (2 * PARTICLE_COUNT);
-	particle_indexes.resize(constants::PARTICLES_COUNT);
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		particle_indexes[i] = i;
-
 		float vx = utils::random::rand(-max_vel, max_vel);
 		float vy = utils::random::rand(-max_vel, max_vel);
 		float x = utils::random::rand(-constants::R, -0.25f * constants::R);
@@ -73,33 +76,41 @@ void ParticleSystem::printArrangement()
 void ParticleSystem::update_particles_collisions()
 {
 	float PARTICLE_RADIUS = constants::PARTICLE_RADIUS;
-	std::sort(particle_indexes.begin(), particle_indexes.end(), [&](int a, int b) { return (particles[a].position.y > particles[b].position.y); });
-	for (int i = 0; i < particle_indexes.size(); i++)
-	{
-		for (int j = i+1; j < particle_indexes.size(); j++)
-		{
-			Particle &a = particles[particle_indexes[i]], &b = particles[particle_indexes[j]];
-			if (a.position.y - b.position.y <= 2 * PARTICLE_RADIUS) //collisions possible
+
+	for (int i = 0; i < particle_cells.size(); i++)
+		for (int j = 0; j < particle_cells[i].size(); j++)
+			particle_cells[i][j].clear();
+
+	for (int i = 0; i < particles.size(); i++)
+		particle_cells[(particles[i].position.x - UPPER_LEFT.x) / cell_size][(BOTTOM_RIGHT.y - particles[i].position.y) / cell_size].push_back(i);
+
+	for(int i=0;i<particle_cells.size();i++)
+		for (int j = 0; j< particle_cells[i].size(); j++)
+			for (auto index1 : particle_cells[i][j])
 			{
-				sf::Vector2f L = b.position - a.position;
-				float distanceSquared = L.x*L.x + L.y * L.y;
-				if (distanceSquared <= 4 * PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
-				{
-					sf::Vector2f FirstParallel = (a.velocity.x * L.x + a.velocity.y * L.y) / distanceSquared * L,
-						SecondParallel = (b.velocity.x * L.x + b.velocity.y * L.y) / distanceSquared * L,
-						FirstPerpendicular = a.velocity - FirstParallel,
-						SecondPerpendicular = b.velocity - SecondParallel;
-					if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0) //collision
-					{
-						a.velocity = FirstPerpendicular + SecondParallel;
-						b.velocity = SecondPerpendicular + FirstParallel;
-					}
-				}
+				Particle &a = particles[index1];
+				sf::Vector2i moves[] = { {0,0}, {1,0}, {0,1}, {1,1}, {1,-1} };
+				for (auto move : moves)
+					if( (i + move.x)>=0 && (j + move.y) >= 0 && (i + move.x) < particle_cells.size() && (j + move.y) < particle_cells[i + move.x].size())
+						for (auto index2 : particle_cells[i + move.x][j + move.y])
+						{
+							Particle &b = particles[index2];
+							sf::Vector2f L = b.position - a.position;
+							float distanceSquared = L.x*L.x + L.y * L.y;
+							if (distanceSquared <= 4 * PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
+							{
+								sf::Vector2f FirstParallel = (a.velocity.x * L.x + a.velocity.y * L.y) / distanceSquared * L,
+									SecondParallel = (b.velocity.x * L.x + b.velocity.y * L.y) / distanceSquared * L,
+									FirstPerpendicular = a.velocity - FirstParallel,
+									SecondPerpendicular = b.velocity - SecondParallel;
+								if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0) //collision
+								{
+									a.velocity = FirstPerpendicular + SecondParallel;
+									b.velocity = SecondPerpendicular + FirstParallel;
+								}
+							}
+						}
 			}
-			else //no more collisions for this particle
-				break;
-		}
-	}
 
 }
 
