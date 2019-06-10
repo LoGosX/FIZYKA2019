@@ -18,6 +18,7 @@ class RenderSystem
 	float zoom_amount{ 1.1f };
 	bool mouse_down{ false };
 	bool mouse_moved{ false };
+	bool points{ false };
 	std::atomic<bool> window_open{ false }, initialized { false };
 	sf::Vector2f last_mouse_global_position, current_mouse_global_position;
 	sf::Vector2i last_mouse_local_position, current_mouse_local_position;

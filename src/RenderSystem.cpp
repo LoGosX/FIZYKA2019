@@ -174,23 +174,27 @@ void zoomViewAt(sf::Vector2i pixel, sf::RenderWindow& window, float zoom)
 
 void RenderSystem::update_particle_sprite()
 {
+	points = false;
 	auto view_size = window->getView().getSize();
 	float x = utils::sqr_magnitude(view_size) / constants::PARTICLE_RADIUS;
-	int points;
+	int points_n;
 	if(x < 500)
-		points = 30;
+		points_n = 30;
 	else if(x < 1000)
-		points = 20;
+		points_n = 20;
 	else if(x < 5000)
-		points = 10;
+		points_n = 10;
 	else if(x < 20000)
-		points = 5;
+		points_n = 5;
 	else
-		points = 3;
-	// std::cerr << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
-	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
-	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
-	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
+		points = true;
+	if(!points)
+	{
+		// std::cerr << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
+		particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points);
+		particle_sprite.setFillColor(constants::PARTICLE_COLOR);
+		particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
+	}	
 }
 
 bool RenderSystem::handle_input()

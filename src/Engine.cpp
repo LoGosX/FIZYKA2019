@@ -23,6 +23,7 @@ Engine::~Engine()
 {
 }
 
+
 void Engine::run()
 {
 	if(!constants::PARALLEL)
@@ -65,8 +66,9 @@ void Engine::run()
 		}
 	}else
 	{
+		auto duration_cast = [](auto t){ return std::chrono::duration_cast<std::chrono::milliseconds>(t).count(); };
 		std::cerr << "Initializing systems.\n";
-		render_thread = std::thread([this]{
+		render_thread = std::thread([this, duration_cast]{
 			std::cerr << "Initializing render_thread\n";
 			this->render_system->initialize();
 			std::cerr << "Render_thread initialized\n";
@@ -78,20 +80,33 @@ void Engine::run()
 					this->running = false;
 					break;
 				}
-
+				auto time_point1 = std::chrono::high_resolution_clock::now();
 				this->render_system->clear();
 				this->render_system->draw_particles_container();
 				this->render_system->draw_particles(this->particle_system->get_particles());
 				this->render_system->display();
+				auto time_point2 = std::chrono::high_resolution_clock::now();
+				if(constants::DEBUG_LOG)
+				{
+					auto duration = duration_cast(time_point2 - time_point1);
+					std::cerr << "RenderSystem update: " << duration << "ms " << (int)(1.f / (duration / 1000.f)) << "FPS" << std::endl;
 				}
+			}
 		});
 
 
 		std::cerr << "Starting physic_thread\n";
-		physic_thread = std::thread([this]{
+		physic_thread = std::thread([this, duration_cast]{
 			while(this->running)
 			{
+				auto time_point1 = std::chrono::high_resolution_clock::now();
 				this->particle_system->update(constants::DELTA_TIME);
+				auto time_point2 = std::chrono::high_resolution_clock::now();
+				if(constants::DEBUG_LOG)
+				{
+					auto duration = duration_cast(time_point2 - time_point1);
+					std::cerr << "PhysicSystem update: " << duration << "ms " << (int)(1.f / (duration / 1000.f)) << "FPS" << std::endl;
+				}
 			}
 		});
 		

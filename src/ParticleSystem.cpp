@@ -72,6 +72,23 @@ void ParticleSystem::printArrangement()
 	std::cerr << left << " : " << right << "\n";
 }
 
+void particlesCollide(Particle& a, Particle& b)
+{
+	sf::Vector2f L = b.position - a.position;
+	float distanceSquared = L.x*L.x + L.y * L.y;
+	if (distanceSquared <= 4 * constants::PARTICLE_RADIUS*constants::PARTICLE_RADIUS) //in range
+	{
+		sf::Vector2f FirstParallel = (a.velocity.x * L.x + a.velocity.y * L.y) / distanceSquared * L,
+			SecondParallel = (b.velocity.x * L.x + b.velocity.y * L.y) / distanceSquared * L,
+			FirstPerpendicular = a.velocity - FirstParallel,
+			SecondPerpendicular = b.velocity - SecondParallel;
+		if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0) //collision
+		{
+			a.velocity = FirstPerpendicular + SecondParallel;
+			b.velocity = SecondPerpendicular + FirstParallel;
+		}
+	}
+}
 
 void ParticleSystem::update_particles_collisions()
 {
@@ -95,20 +112,7 @@ void ParticleSystem::update_particles_collisions()
 						for (auto index2 : particle_cells[i + move.x][j + move.y])
 						{
 							Particle &b = particles[index2];
-							sf::Vector2f L = b.position - a.position;
-							float distanceSquared = L.x*L.x + L.y * L.y;
-							if (distanceSquared <= 4 * PARTICLE_RADIUS*PARTICLE_RADIUS) //in range
-							{
-								sf::Vector2f FirstParallel = (a.velocity.x * L.x + a.velocity.y * L.y) / distanceSquared * L,
-									SecondParallel = (b.velocity.x * L.x + b.velocity.y * L.y) / distanceSquared * L,
-									FirstPerpendicular = a.velocity - FirstParallel,
-									SecondPerpendicular = b.velocity - SecondParallel;
-								if ((SecondParallel - FirstParallel).x * L.x < 0 || (SecondParallel - FirstParallel).y * L.y < 0) //collision
-								{
-									a.velocity = FirstPerpendicular + SecondParallel;
-									b.velocity = SecondPerpendicular + FirstParallel;
-								}
-							}
+							particlesCollide(a, b);
 						}
 			}
 
