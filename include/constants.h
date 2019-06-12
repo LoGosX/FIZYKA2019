@@ -26,5 +26,5 @@ namespace constants
 
 	//Other constants
 	const bool DEBUG_LOG = false;
-	const float ENTROPY_LOG_DELAY = sqrt(PARTICLES_COUNT) / 50;
+	const float ENTROPY_LOG_DELAY = sqrt(PARTICLES_COUNT) / 200;
 };
