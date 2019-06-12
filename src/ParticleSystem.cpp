@@ -16,7 +16,6 @@ ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(par
 	for (int i =0;i<particle_cells.size();i++)
 		particle_cells[i].resize(height / cell_size + 1);
 
-	_enCounter = std::make_unique<EntropyCounter>();
 	spawn_particles();
 }
 
