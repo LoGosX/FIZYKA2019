@@ -68,6 +68,7 @@ void Engine::run()
 	}else
 	{
 		std::cerr << "Initializing systems.\n";
+		std::cerr << "Simulation for " << constants::PARTICLES_COUNT << " particles, gathering entropy data once every " << sqrt(constants::PARTICLES_COUNT) / 50 << " real time seconds.\n";
 		render_thread = std::thread([this]{
 			std::cerr << "Initializing render_thread\n";
 			this->render_system->initialize();
@@ -100,14 +101,12 @@ void Engine::run()
 		std::cerr << "Threads started.\n";
 		
 		auto entropy_log_thread = std::thread([this]{
-			float entropy_delay = 1.f;
+			float entropy_delay = sqrt(constants::PARTICLES_COUNT) / 50;
 			while(this->running)
 			{
-				//std::cerr << "sleep... ";
-				sf::sleep(sf::seconds(entropy_delay));
-				//std::cerr << " Done. Outputing entropy" << std::endl;
 				particle_system->get_entropy_counter()->updateEntropy(particle_system->get_particles());
 				std::cout << particle_system->get_entropy_counter()->get_entropy() << std::endl;
+				sf::sleep(sf::seconds(entropy_delay));
 			}
 		});
 		
