@@ -11,6 +11,7 @@ class RenderSystem
 	/*
 	Class responsible for drawing and input handling
 	*/
+
 	std::unique_ptr<sf::RenderWindow> window;
 
 	// If zoom_amount is 1.1f, it will zoom in or out by 10 % ;
@@ -18,24 +19,22 @@ class RenderSystem
 	float zoom_amount{ 1.1f };
 	bool mouse_down{ false };
 	bool mouse_moved{ false };
+	bool points{ false };
 	std::atomic<bool> window_open{ false }, initialized { false };
-	sf::Vector2f last_mouse_global_position, current_mouse_global_position;
 	sf::Vector2i last_mouse_local_position, current_mouse_local_position;
-	void move_view(); //move view resulting from mouse drag
 	int window_width;
 	int window_height;
 	const char* window_title;
 
-	//drawing and OPENGL variables
+	//drawing
 	sf::CircleShape particle_sprite;
 	sf::RectangleShape container;
-	sf::VertexArray va; //used for drawing particles in one draw call
-	std::vector<sf::Vertex> veca;
-	unsigned int vbo;
-	unsigned int vao;
-	sf::Shader shader;
+	std::vector<sf::Vertex> veca; //used for drawing particles in one draw call
 
-	void update_particle_sprite();
+	int num_particles_on_screen(const std::vector<Particle>&);
+	void update_particle_sprite(int);
+	void reset_view();
+	void move_view(); //move view resulting from mouse drag
 public:
 	RenderSystem(int window_width, int window_height, const char* window_title);
 	~RenderSystem();

@@ -6,17 +6,19 @@
 
 namespace utils
 {
-	inline float sqr_magnitude(const sf::Vector2f& a) { return a.x * a.x + a.y * a.y; }
+	template<typename T>
+	inline float dot(const sf::Vector2<T>& a, const sf::Vector2<T>& b){ return a.x * b.x + a.y * b.y;}
+
+	inline float sqr_magnitude(const sf::Vector2f& a) { return dot(a, a); }
 	inline float magnitude(const sf::Vector2f& a) { return sqrtf(sqr_magnitude(a)); }
 	inline float sqr_distance(const sf::Vector2f& a, const sf::Vector2f& b) { return sqr_magnitude(a - b); }
 	inline float distance(const sf::Vector2f& a, const sf::Vector2f& b) { return sqrtf(sqr_distance(a, b)); }
 	
-	template<typename T>
-	inline float dot(const sf::Vector2<T>& a, const sf::Vector2<T>& b){ return a.x * b.x + a.y * b.y;}
-	
 	inline sf::Vector2f normalize(const sf::Vector2f& a){ return a / magnitude(a); }
 
-	
+	template<typename A, typename B, typename C>
+	inline typename std::common_type<A, B, C>::type clamp(A val, B min, C max) { return (val < min ? min : (val > max ? max : val)); }
+
 	namespace random
 	{
 		inline static std::mt19937 _mt;
