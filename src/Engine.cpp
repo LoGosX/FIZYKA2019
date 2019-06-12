@@ -17,6 +17,8 @@ Engine::Engine(int window_width, int window_height, const char * window_title)
 
 	render_system = std::unique_ptr<RenderSystem>(new RenderSystem(window_width, window_height, window_title));
 	particle_system = std::unique_ptr<ParticleSystem>(new ParticleSystem(constants::PARTICLES_COUNT, constants::R)); //TODO: load values from file (?)
+
+
 }
 
 Engine::~Engine()
@@ -104,6 +106,7 @@ void Engine::run()
 				//std::cerr << "sleep... ";
 				sf::sleep(sf::seconds(entropy_delay));
 				//std::cerr << " Done. Outputing entropy" << std::endl;
+				particle_system->get_entropy_counter()->updateEntropy(particle_system->get_particles());
 				std::cout << particle_system->get_entropy_counter()->get_entropy() << std::endl;
 			}
 		});

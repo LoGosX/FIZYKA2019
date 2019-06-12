@@ -7,7 +7,9 @@
 
 ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(particle_count), UPPER_LEFT(sf::Vector2f{ -R, -R }), BOTTOM_RIGHT(sf::Vector2f{ R, R })
 {
-	_enCounter = std::make_unique<EntropyCounter>();
+	float maxSpeed = constants::W * constants::INITIAL_VELOCITY_MODIFIER / particle_count;
+	_enCounter = std::unique_ptr<EntropyCounter>(new EntropyCounter({ -constants::R , -constants::R , 2 * constants::R, 2 * constants::R },
+		maxSpeed, constants::BOX_NUMBER));
 	spawn_particles();
 }
 
