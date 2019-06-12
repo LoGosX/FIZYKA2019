@@ -26,6 +26,8 @@ bool ParticleSystem::update(double delta_time)
 	update_positions(delta_time);
 	update_wall_collisions();
 	update_particles_collisions();
+
+	updates_count++;
 	return true;
 }
 

@@ -199,7 +199,6 @@ void RenderSystem::update_particle_sprite(int x)
 
 	if(!points)
 	{
-		// std::cerr << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
 		particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, points_n);
 		particle_sprite.setFillColor(constants::PARTICLE_COLOR);
 		particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
@@ -231,9 +230,6 @@ bool RenderSystem::handle_input()
 			mouse_moved = true;
 			if (mouse_down)
 			{
-				last_mouse_global_position = current_mouse_global_position;
-				current_mouse_global_position = window->mapPixelToCoords(sf::Mouse::getPosition(*window));
-
 				last_mouse_local_position = current_mouse_local_position;
 				current_mouse_local_position = sf::Mouse::getPosition(*window);
 			}
@@ -252,8 +248,6 @@ bool RenderSystem::handle_input()
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
 				mouse_down = true;
-				last_mouse_global_position = current_mouse_global_position = window->mapPixelToCoords(sf::Mouse::getPosition(*window));
-
 				last_mouse_local_position = current_mouse_local_position = sf::Mouse::getPosition(*window);
 			}
 		}
@@ -267,8 +261,6 @@ bool RenderSystem::handle_input()
 	//drag screen with mouse 
 	if (mouse_moved && mouse_down)
 	{
-		//sf::Vector2f offset = last_mouse_global_position - current_mouse_global_position;
-		
 		sf::Vector2f offset = window->mapPixelToCoords(last_mouse_local_position) - window->mapPixelToCoords(current_mouse_local_position);
 		sf::View new_view = window->getView();
 		new_view.move(offset);
