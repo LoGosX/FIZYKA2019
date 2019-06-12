@@ -4,7 +4,7 @@
 #include "RenderSystem.h"
 #include "ParticleSystem.h"
 #include "constants.h"
-#include <ctime>
+#include "utils.h"
 
 Engine::Engine(int window_width, int window_height, const char * window_title)
 {
@@ -30,7 +30,7 @@ void Engine::run()
 	{
 		render_system->initialize();
 		std::cerr << "Running engine.\n";
-		auto duration_cast = [](auto t){ return std::chrono::duration_cast<std::chrono::milliseconds>(t).count(); };
+		auto duration_cast = [](auto t){ return std::chrono::duration_cast<std::chrono::nanoseconds>(t).count(); };
 		size_t frame = 1;
 		while (running)
 		{	
@@ -89,7 +89,11 @@ void Engine::run()
 				if(constants::DEBUG_LOG)
 				{
 					auto duration = duration_cast(time_point2 - time_point1);
-					std::cerr << "RenderSystem update: " << duration << "ms " << (int)(1.f / (duration / 1000.f)) << "FPS" << std::endl;
+					unsigned long long updates = 1.f / (duration / 1000.f);
+					if(updates < INT_MAX)
+						std::cerr << "RenderSystem update: " << duration << "ms " << updates << " FPS" << std::endl;
+					else
+						std::cerr << "RenderSystem update: " << duration << "ms " << "A LOT OF" << " FPS" << std::endl;
 				}
 			}
 		});
@@ -105,7 +109,12 @@ void Engine::run()
 				if(constants::DEBUG_LOG)
 				{
 					auto duration = duration_cast(time_point2 - time_point1);
-					std::cerr << "PhysicSystem update: " << duration << "ms " << (int)(1.f / (duration / 1000.f)) << "FPS" << std::endl;
+					unsigned long long updates = 1.f / (duration / 1000.f);
+					updates = utils::clamp(updates, 1, INT_FAST32_MAX);
+					if(updates < INT_MAX)
+						std::cerr << "ParticleSystem update: " << duration << "ms " << updates << " UPS" << std::endl;
+					else
+						std::cerr << "ParticleSystem update: " << duration << "ms " << "A LOT OF" << " UPS" << std::endl;
 				}
 			}
 		});

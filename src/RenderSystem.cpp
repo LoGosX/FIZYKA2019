@@ -6,10 +6,19 @@
 #include "constants.h"
 #include "ParticleSystem.h"
 #include "utils.h"
-// #include "GLExtensions.hpp"
+#include <array>
+#include <type_traits>
 
 RenderSystem::RenderSystem(int window_width, int window_height, const char* window_title) : window_width(window_width), window_height(window_height), window_title(window_title)
 {
+}
+
+void RenderSystem::reset_view()
+{
+	sf::View view;
+	view.setCenter(0, 0);
+	view.setSize(2 * constants::R, 2 * constants::R);
+	window->setView(view);
 }
 
 bool RenderSystem::initialize()
@@ -17,30 +26,18 @@ bool RenderSystem::initialize()
 	
 	window = std::unique_ptr<sf::RenderWindow>(new sf::RenderWindow(sf::VideoMode(window_width, window_height), window_title, sf::Style::Close)); //sf::Style::Close until resizing is properly handled
 
-	// GLEXT_glGenBuffers(1, &vbo);
-	if(!sf::Shader::isGeometryAvailable())
-		std::cerr << "Geometry shader not avaliable!" << std::endl;
-	else
-		std::cerr << "Geometry shader avaliable." << std::endl;
-	if(!shader.loadFromFile("..\\shaders\\vertex.glsl", "..\\shaders\\geometry.glsl", "..\\shaders\\fragment.glsl"))
-		std::cerr << "Could not load shaders" << std::endl;
-
-
-	veca.reserve(constants::PARTICLES_COUNT * 100); //not exact value
-	sf::View view;
-	view.setCenter(0, 0);
-	view.setSize(2 * constants::R, 2 * constants::R);
-	window->setView(view);
+	veca.reserve((constants::PARTICLES_COUNT > constants::OK_VERTICES_COUNT ? constants::PARTICLES_COUNT : constants::OK_VERTICES_COUNT) * 200 ); //not exact value
+	
 
 	particle_sprite = sf::CircleShape(constants::PARTICLE_RADIUS, 3);
 	particle_sprite.setFillColor(constants::PARTICLE_COLOR);
 	particle_sprite.setOrigin(constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS);
 
+	reset_view();
 	//window->setVerticalSyncEnabled(true);
-	window->setFramerateLimit(60);
+	// window->setFramerateLimit(60);
 
 	setup_particle_container(sf::FloatRect(-constants::R, -constants::R, 2 * constants::R, 2 * constants::R));
-	update_particle_sprite();
 
 	initialized = true;
 	window_open = true;
@@ -61,26 +58,41 @@ const std::atomic<bool>& RenderSystem::is_window_open() const
 	return window_open;
 }
 
+
+
+std::array<int, 3> particle_color(sf::Vector2f velocity)
+{
+	float max_vel = constants::W / (2 * constants::PARTICLES_COUNT) * constants::INITIAL_VELOCITY_MODIFIER;
+	auto fraction = utils::magnitude(velocity) / ( 3 * max_vel);
+	fraction = utils::clamp(fraction, 0, 1);
+	int R = 255 * fraction;
+	int B = -255 * fraction + 255;
+	int G = 0;
+	R = std::max(0, R);
+	R = std::min(255, R);
+	B = std::max(0, B);
+	B = std::min(255, B);
+	return {R, G, B};
+}
+
 bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 {
-	// GLEXT_glBufferData(GL_ARRAY_BUFFER_ARB, sizeof(Particle) * particles.size(), particles.data(), GL_DYNAMIC_DRAW_ARB);
-
-	bool points = false;
 	sf::FloatRect rect{ window->getView().getCenter() - window->getView().getSize() / 2.f, window->getView().getSize() };
 	int pc = particle_sprite.getPointCount();
 	int k = 0;
 	const sf::Vector2f t{constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS};
 	sf::Vertex v;
-	//auto upd = [&, this]{ this->vb.update(&v, 1, k++);};
-	if(points)
-		va.setPrimitiveType(sf::PrimitiveType::Points);
-	else
-		va.setPrimitiveType(sf::PrimitiveType::Triangles);
-	va.clear();
-	//va.resize(particles.size() + 3 * particles.size() * pc);
+	
 	auto upd = [&]{ veca[k++] = v; };
-	//auto drw = [&]{ window->draw(vb, 0, k); }
-	auto drw = [&]{ window->draw(veca.data(), k, sf::PrimitiveType::Triangles); };
+	auto drw = [&]{ 
+		if(!points)
+			window->draw(veca.data(), k, sf::PrimitiveType::Triangles);
+		else
+			window->draw(veca.data(), k, sf::PrimitiveType::Points);
+	};
+
+	int pc_screen = num_particles_on_screen(particles);
+	update_particle_sprite(pc_screen);
 
 	for(auto p : particles)
 	{
@@ -88,15 +100,7 @@ bool RenderSystem::draw_particles(const std::vector<Particle>& particles)
 		if(!rect.intersects(r))
 			continue;
 		
-		float max_vel = constants::W / (2 * constants::PARTICLES_COUNT) * constants::INITIAL_VELOCITY_MODIFIER;
-		auto fraction = utils::dot(p.velocity, p.velocity) / (4 * max_vel * max_vel);
-		int R = 255 * fraction;
-		int B = -255 * fraction + 255;
-		int G = 0;
-		R = std::max(0, R);
-		R = std::min(255, R);
-		B = std::max(0, B);
-		B = std::min(255, B);
+		auto [R, G, B] = particle_color(p.velocity);
 		v.color = sf::Color(R, G, B);
 		if(!points)
 		{
@@ -172,26 +176,27 @@ void zoomViewAt(sf::Vector2i pixel, sf::RenderWindow& window, float zoom)
 	window.setView(view);
 }
 
-void RenderSystem::update_particle_sprite()
+int RenderSystem::num_particles_on_screen(const std::vector<Particle>& particles)
 {
-	points = false;
-	auto view_size = window->getView().getSize();
-	float x = utils::sqr_magnitude(view_size) / constants::PARTICLE_RADIUS;
-	int points_n;
-	if(x < 500)
-		points_n = 30;
-	else if(x < 1000)
-		points_n = 20;
-	else if(x < 5000)
-		points_n = 10;
-	else if(x < 20000)
-		points_n = 5;
-	else
-	{
-		points_n = 5;
-		points = true;
-	}
-	points = false;
+	int pc_screen = 0;
+	sf::FloatRect rect{ window->getView().getCenter() - window->getView().getSize() / 2.f, window->getView().getSize() };
+	const sf::Vector2f t{constants::PARTICLE_RADIUS, constants::PARTICLE_RADIUS};
+	for(const auto& p : particles)
+		pc_screen += rect.intersects({p.position - t, t * 2.f});
+	return pc_screen;
+}
+
+void RenderSystem::update_particle_sprite(int x)
+{
+	x = utils::clamp(x, 1, constants::PARTICLES_COUNT);
+	
+	//x * points_n <= OK_VERTICES_COUNT
+	// points_n <= OK_VERTICES_COUNT / x
+	// points_n ~= OK_VERTICES_COUNT / x;
+	int points_n = constants::OK_VERTICES_COUNT / x;
+	points = (points_n < 2);
+	points_n = utils::clamp(points_n, 3, 60);
+
 	if(!points)
 	{
 		// std::cerr << view_size.x << ' ' << view_size.y << ' ' << points << std::endl;
@@ -218,6 +223,9 @@ bool RenderSystem::handle_input()
 			//TODO: update the view to the new size of the window
 		}
 
+		if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::H))
+			reset_view();
+
 		if (event.type == sf::Event::MouseMoved)
 		{
 			mouse_moved = true;
@@ -237,8 +245,6 @@ bool RenderSystem::handle_input()
 				zoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *window, (1.f / zoom_amount));
 			else if (event.mouseWheelScroll.delta < 0)
 				zoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *window, zoom_amount);
-			//set particle sprite
-			update_particle_sprite();
 		}
 
 		if (event.type == sf::Event::MouseButtonPressed)

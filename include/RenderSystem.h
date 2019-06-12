@@ -30,13 +30,11 @@ class RenderSystem
 	//drawing and OPENGL variables
 	sf::CircleShape particle_sprite;
 	sf::RectangleShape container;
-	sf::VertexArray va; //used for drawing particles in one draw call
-	std::vector<sf::Vertex> veca;
-	unsigned int vbo;
-	unsigned int vao;
-	sf::Shader shader;
+	std::vector<sf::Vertex> veca; //used for drawing particles in one draw call
 
-	void update_particle_sprite();
+	int num_particles_on_screen(const std::vector<Particle>&);
+	void update_particle_sprite(int);
+	void reset_view();
 public:
 	RenderSystem(int window_width, int window_height, const char* window_title);
 	~RenderSystem();
