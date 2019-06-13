@@ -9,9 +9,9 @@ ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(par
 {
 	size_t width = BOTTOM_RIGHT.x - UPPER_LEFT.x,
 		height = BOTTOM_RIGHT.y - UPPER_LEFT.y;
-	particle_cells.resize(width / cell_size + 1);
+	particle_cells.resize(width / cell_size + 2);
 	for (int i =0;i<particle_cells.size();i++)
-		particle_cells[i].resize(height / cell_size + 1);
+		particle_cells[i].resize(height / cell_size + 2);
 
 	_enCounter = std::make_unique<EntropyCounter>();
 	spawn_particles();
@@ -94,30 +94,22 @@ void particlesCollide(Particle& a, Particle& b)
 
 void ParticleSystem::update_particles_collisions()
 {
-	float PARTICLE_RADIUS = constants::PARTICLE_RADIUS;
+	static const sf::Vector2i moves[] = { {0,0}, {1,0}, {0,1}, {1,1}, {1,-1} };
 
-	for (int i = 0; i < particle_cells.size(); i++)
+	for (int i = 0; i < particles.size(); i++)	//put particles in cells
+		particle_cells[(particles[i].position.x - UPPER_LEFT.x) / cell_size + 1][(BOTTOM_RIGHT.y - particles[i].position.y) / cell_size + 1].push_back(i);
+
+	for (auto& p1 : particles)	//check for collisions
+	{
+		int cellx = (p1.position.x - UPPER_LEFT.x) / cell_size + 1,
+			celly = (BOTTOM_RIGHT.y - p1.position.y) / cell_size + 1;
+		for (auto move : moves)
+			for (auto index : particle_cells[cellx + move.x][celly + move.y])
+				particlesCollide(p1, particles[index]);
+	}
+	for (int i = 0; i < particle_cells.size(); i++)	//clear cells
 		for (int j = 0; j < particle_cells[i].size(); j++)
 			particle_cells[i][j].clear();
-
-	for (int i = 0; i < particles.size(); i++)
-		particle_cells[(particles[i].position.x - UPPER_LEFT.x) / cell_size][(BOTTOM_RIGHT.y - particles[i].position.y) / cell_size].push_back(i);
-
-	for(int i=0;i<particle_cells.size();i++)
-		for (int j = 0; j< particle_cells[i].size(); j++)
-			for (auto index1 : particle_cells[i][j])
-			{
-				Particle &a = particles[index1];
-				sf::Vector2i moves[] = { {0,0}, {1,0}, {0,1}, {1,1}, {1,-1} };
-				for (auto move : moves)
-					if( (i + move.x)>=0 && (j + move.y) >= 0 && (i + move.x) < particle_cells.size() && (j + move.y) < particle_cells[i + move.x].size())
-						for (auto index2 : particle_cells[i + move.x][j + move.y])
-						{
-							Particle &b = particles[index2];
-							particlesCollide(a, b);
-						}
-			}
-
 }
 
 void ParticleSystem::update_wall_collisions()
