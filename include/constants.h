@@ -9,7 +9,7 @@ namespace constants
 	const float PARTICLE_RADIUS = 0.1f;
 	const float R = 50.f;
 	const float W = 100.0f;
-	const size_t PARTICLES_COUNT = 100000;
+	const size_t PARTICLES_COUNT = 50000;
 	const float DELTA_TIME = 1.f / (2 * W);
 	const float INITIAL_VELOCITY_MODIFIER = 10000.f;
 	const size_t CELL_FACTOR = 1;
