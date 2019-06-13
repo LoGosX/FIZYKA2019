@@ -4,5 +4,5 @@ build/*
 # ignore popular developer's settings folders such as .vs or .vs 
 .*
 *.png
-
+src/__pycache__
 !.gitignore
