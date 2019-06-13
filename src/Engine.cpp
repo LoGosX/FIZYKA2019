@@ -66,6 +66,8 @@ void Engine::run()
 			auto time_point1 = std::chrono::high_resolution_clock::now();
 			this->particle_system->update(constants::DELTA_TIME);
 			auto time_point2 = std::chrono::high_resolution_clock::now();
+			if(!this->render_system->barrier_present)
+				this->particle_system->remove_barrier();
 			if(constants::DEBUG_LOG)
 			{
 				auto duration = duration_cast(time_point2 - time_point1);

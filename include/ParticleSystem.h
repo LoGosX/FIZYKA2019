@@ -48,6 +48,7 @@ public:
 	~ParticleSystem();
 
 	int num_of_updates() const;
+	void remove_barrier() { barrier_present = false; }
 
 	bool update(double delta_time); 
 

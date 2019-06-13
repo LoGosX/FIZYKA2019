@@ -36,6 +36,7 @@ class RenderSystem
 	void reset_view();
 	void move_view(); //move view resulting from mouse drag
 public:
+	std::atomic<bool> barrier_present {true};
 	RenderSystem(int window_width, int window_height, const char* window_title);
 	~RenderSystem();
 

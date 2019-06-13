@@ -63,7 +63,7 @@ const std::atomic<bool>& RenderSystem::is_window_open() const
 std::array<int, 3> particle_color(sf::Vector2f velocity)
 {
 	float max_vel = constants::W / (2 * constants::PARTICLES_COUNT) * constants::INITIAL_VELOCITY_MODIFIER;
-	auto fraction = utils::magnitude(velocity) / ( 3 * max_vel);
+	auto fraction = utils::magnitude(velocity) / ( constants::COLOR_CONST * max_vel);
 	fraction = utils::clamp(fraction, 0, 1);
 	int R = 255 * fraction;
 	int B = -255 * fraction + 255;
@@ -222,8 +222,11 @@ bool RenderSystem::handle_input()
 			//TODO: update the view to the new size of the window
 		}
 
-		if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::H))
-			reset_view();
+		if (event.type == sf::Event::KeyPressed)
+			if(sf::Keyboard::isKeyPressed(sf::Keyboard::H))
+				reset_view();
+			else if(sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+				barrier_present = false;
 
 		if (event.type == sf::Event::MouseMoved)
 		{
