@@ -5,6 +5,7 @@
 #include "ParticleSystem.h"
 #include "constants.h"
 #include "utils.h"
+#include <ctime>
 
 Engine::Engine(int window_width, int window_height, const char * window_title)
 {
@@ -23,7 +24,6 @@ Engine::~Engine()
 {
 }
 
-
 void Engine::run()
 {
 
@@ -33,6 +33,7 @@ void Engine::run()
 		std::cerr << "Initializing render_thread\n";
 		this->render_system->initialize();
 		std::cerr << "Render_thread initialized\n";
+		std::cerr << "Running simulation for " << constants::PARTICLES_COUNT << " particles, gathering entropy data once every " << constants::ENTROPY_LOG_DELAY << " real time seconds.\n";
 		while(this->running)
 		{
 			this->render_system->handle_input();
@@ -75,23 +76,25 @@ void Engine::run()
 				else
 					std::cerr << "ParticleSystem update: " << duration << "ms " << "A LOT OF" << " UPS" << std::endl;
 			}
-		}
-	});
+		}});
+		
+		std::cerr << "Threads started.\n";
+		
+		auto entropy_log_thread = std::thread([this]{
+
+			while(this->running)
+			{
+			    particle_system->get_entropy_counter()->updateEntropy(particle_system->get_particles());
+				std::cout << particle_system->get_entropy_counter()->get_entropy() << std::endl;
+				sf::sleep(sf::seconds(constants::ENTROPY_LOG_DELAY));
+			}
+		});
+		
+		entropy_log_thread.join();
+		render_thread.join();
+		physic_thread.join();
+		std::cerr << "Threads joined\n";
 	
-	std::cerr << "Threads started.\n";
-	
-	auto entropy_log_thread = std::thread([this]{
-		while(this->running)
-		{
-			sf::sleep(sf::seconds(constants::ENTROPY_LOG_DELAY));
-			std::cout << particle_system->get_entropy_counter()->get_entropy() << std::endl;
-		}
-	});
-	
-	entropy_log_thread.join();
-	render_thread.join();
-	physic_thread.join();
-	std::cerr << "Threads joined\n";
 	std::cerr << "Engine stopped.\n";
 }
 

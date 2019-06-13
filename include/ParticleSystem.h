@@ -1,9 +1,12 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "EntropyCounter.h"
+#include <atomic>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <thread>
+
+#include "EntropyCounter.h"
 
 struct Particle;
 
@@ -19,6 +22,10 @@ class ParticleSystem
 	const sf::Vector2f UPPER_LEFT, BOTTOM_RIGHT;
 	std::vector<Particle> particles;
 	std::vector<std::vector<std::vector<int>>> particle_cells;
+
+	std::atomic<bool> barrier_present { true };
+	float barrier_x {-0.5f}; //where is wall located
+	std::thread barrier_thread;
 
 	std::unique_ptr<EntropyCounter> _enCounter; // This is my stuff to count a entropy of the system
 
