@@ -12,7 +12,7 @@ namespace constants
 	const size_t PARTICLES_COUNT = 50000;
 	const float DELTA_TIME = 1.f / (2 * W);
 	const float INITIAL_VELOCITY_MODIFIER = 10000.f;
-	const size_t CELL_FACTOR = 1.f;
+	const size_t CELL_FACTOR = 1;
 
 	//Drawing constants
 	const sf::Color PARTICLE_COLOR = sf::Color::Green;
@@ -26,5 +26,6 @@ namespace constants
 
 	//Other constants
 	const bool DEBUG_LOG = false;
-	const float ENTROPY_LOG_DELAY = sqrt(PARTICLES_COUNT) / 200;
+	const float ENTROPY_LOG_DELAY = sqrt(PARTICLES_COUNT) / 200.0;
+	const float BARRIER_LIFETIME =  0.f; //1s irl
 };

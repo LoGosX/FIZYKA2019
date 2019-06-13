@@ -13,14 +13,20 @@ ParticleSystem::ParticleSystem(int particle_count, float R) : PARTICLE_COUNT(par
 	size_t width = BOTTOM_RIGHT.x - UPPER_LEFT.x,
 		height = BOTTOM_RIGHT.y - UPPER_LEFT.y;
 	particle_cells.resize(width / cell_size + 1);
-	for (int i =0;i<particle_cells.size();i++)
+	for (size_t i =0;i<particle_cells.size();i++)
 		particle_cells[i].resize(height / cell_size + 1);
+
+	barrier_thread = std::thread([this]{
+		sf::sleep(sf::seconds(constants::BARRIER_LIFETIME));
+		this->barrier_present = false;
+	});
 
 	spawn_particles();
 }
 
 ParticleSystem::~ParticleSystem()
 {
+	barrier_thread.join();
 }
 
 bool ParticleSystem::update(double delta_time)
@@ -40,7 +46,7 @@ void ParticleSystem::spawn_particles()
 	{
 		float vx = utils::random::rand(-max_vel, max_vel);
 		float vy = utils::random::rand(-max_vel, max_vel);
-		float x = utils::random::rand(-constants::R, -0.95f * constants::R);
+		float x = utils::random::rand(-constants::R, -0.75f * constants::R);
 		float y = utils::random::rand(-constants::R, constants::R);
 
 		particles.emplace_back(Particle{ sf::Vector2f{ x, y }, sf::Vector2f{ vx, vy } * constants::INITIAL_VELOCITY_MODIFIER });
@@ -147,6 +153,12 @@ void ParticleSystem::update_wall_collisions()
 		{
 			p.position.y = BOTTOM_RIGHT.y - PARTICLE_RADIUS;
 			p.velocity.y *= -1;
+		}
+		if(barrier_present && barrier_x - p.position.x <= PARTICLE_RADIUS)
+		{
+			if((p.position.x - barrier_x) * p.velocity.x < 0)
+				p.velocity.x *= -1;
+			p.position.x = barrier_x - PARTICLE_RADIUS;
 		}
 	}
 }
